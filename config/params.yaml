@@ -1,0 +1,6 @@
+yGoal: 0.063
+desiredVel: -0.9
+D: 2
+init_x: -0.35
+init_y: 0.125
+init_z: 0.04

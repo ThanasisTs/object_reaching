@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+	<node pkg="object_prediction" type="main" name='ee_control' respawn='false' output='screen'>
+		<rosparam command="load" file="$(find object_prediction)/config/params.yaml"/>
+	</node>
+	
+</launch>
