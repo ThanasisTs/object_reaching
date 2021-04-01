@@ -20,9 +20,9 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 	current_pos.header = msg->header;
 	if (not_reached_init){
 		if (euclidean_distance(current_pos, init_pos) > 0.001){
-			cmd_vel.linear.x = D*(init_pos.point.x - current_pos.point.x);
-			cmd_vel.linear.y = D*(init_pos.point.y - current_pos.point.y);
-			cmd_vel.linear.z = D*(init_pos.point.z - current_pos.point.z);
+			cmd_vel.linear.x = 2*(init_pos.point.x - current_pos.point.x);
+			cmd_vel.linear.y = 2*(init_pos.point.y - current_pos.point.y);
+			cmd_vel.linear.z = 2*(init_pos.point.z - current_pos.point.z);
 			cmd_vel_pub.publish(cmd_vel);
 		}
 		else{
@@ -44,8 +44,7 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 		cmd_vel.linear.y = desiredVel + D*(yGoal - current_pos.point.y + 0.032);
 		cmd_vel.linear.z = 0;
 		cmd_vel_pub.publish(cmd_vel);
-		std::cout << msg->twist.linear.y << std::endl;
-		if (abs(current_pos.point.y - yGoal - 0.032) < 0.003 and not_reached_goal){
+		if (current_pos.point.y - yGoal - 0.032 < 0 and not_reached_goal){
 			ROS_INFO_STREAM("Time duration: " << ros::Time::now().toSec() - init_time << "\n");
 			not_reached_goal = false;
 		}

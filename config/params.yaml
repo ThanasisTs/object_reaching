@@ -1,11 +1,11 @@
 # Reaching goal. 0.083 corresponds to 0.01m distance between the robot and the object
-yGoal: 0.063
+yGoal: -0.107 # 20cm
 
 # Desired velocity which which the robot reaches the object
-desiredVel: -0.9
+desiredVel: -1.1
 
 # Positional error gain 
-D: 2
+D: 4
 
 # Initial robot position
 init_x: -0.35
