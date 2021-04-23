@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+	<node pkg="object_reaching" type="robot_response" name='ee_control' respawn='false' output='screen'>
+		<rosparam command="load" file="$(find object_reaching)/config/robot_response.yaml"/>
+	</node>
+	
+</launch>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+	<node pkg="object_reaching" type="input_process.py" name='input_process' respawn='false' output='screen'>
+	</node>
+
+	<node pkg="object_reaching" type="prediction.py" name='prediction' respawn='false' output='screen'>
+	</node>
+
+	<node pkg="object_reaching" type="robot_motion" name='robot_motion' respawn='false' output='screen'>
+		<rosparam command="load" file="$(find object_reaching)/config/object_reaching.yaml"/>
+	</node>
+	
+</launch>

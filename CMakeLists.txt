@@ -21,5 +21,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable (main src/main.cpp)
-target_link_libraries(main ${catkin_LIBRARIES})
+add_executable (robot_response src/robot_response.cpp)
+target_link_libraries(robot_response ${catkin_LIBRARIES})
+
+add_executable (robot_motion src/robot_motion.cpp)
+target_link_libraries(robot_motion ${catkin_LIBRARIES})
