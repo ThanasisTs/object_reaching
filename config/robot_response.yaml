@@ -1,8 +1,8 @@
 # Reaching goal. 0.083 corresponds to 0.01m distance between the robot and the object
-yGoal: -0.107 # 20cm
+yGoal: -0.007 # 10cm
 
 # Desired velocity which which the robot reaches the object
-desiredVel: -1.1
+desiredVel: -0.9
 
 # Positional error gain 
 D: 4

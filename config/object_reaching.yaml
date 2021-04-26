@@ -1,8 +1,8 @@
 xGoal: [0, 1]
-yGoal: [0, 1] 
+yGoal: [0, 0.22] 
 
 # Desired velocity which which the robot reaches the object
-desiredVel: -1.1
+desiredVel: 0.2
 
 # Positional error gain 
 D: 4

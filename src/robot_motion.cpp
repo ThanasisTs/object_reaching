@@ -24,10 +24,12 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 	if (prediction){
 		if (direction){
 			cmd_vel.linear.x = desiredVel + D*(xGoal[0] - current_pos.point.x);
-			cmd_vel.linear.y = desiredVel + D*(yGoal[0] - current_pos.point.y);
+			cmd_vel.linear.x = 0;
+			cmd_vel.linear.y = -desiredVel + D*(yGoal[0] - current_pos.point.y);
 		}
 		else{
 			cmd_vel.linear.x = desiredVel + D*(xGoal[1] - current_pos.point.x);
+			cmd_vel.linear.x = 0;
 			cmd_vel.linear.y = desiredVel + D*(yGoal[1] - current_pos.point.y);
 		}
 		cmd_vel.linear.z = 0;
