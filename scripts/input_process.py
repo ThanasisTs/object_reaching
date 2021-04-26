@@ -6,15 +6,15 @@ from geometry_msgs.msg import Vector3Stamped
 import numpy as np
 
 
-start, end, start_std = False, False, False
+start, end, start_std, print_time = False, False, False, True
 pub = None
 x_prev, y_prev, time_prev, x_motion, y_motion, time_motion = [], [], [], [], [], []
 count = 0
-
+start_time = None
 # Removal of NaNs, outliers and redundant points at the start of the motion
 # (works in real time and in offline mode)
 def openpose_callback(msg):
-	global pub, start, end, start_std, count, x_prev, y_prev, time_prev
+	global pub, start, end, start_std, count, x_prev, y_prev, time_prev, start_time, print_time
 	x = msg.human_list[0].body_key_points_with_prob[4].x
 	y = msg.human_list[0].body_key_points_with_prob[4].y
 	time = msg.header.stamp
@@ -52,7 +52,10 @@ def openpose_callback(msg):
 						if std_total > 10:
 							end = True
 						if std_total <= 10 and end:
-							# print("Motion ended at sample {}".format(count))
+							if print_time:
+								rospy.loginfo("Human time: {}".format(rospy.Time.now().to_nsec()))
+								print("Motion ended at sample {}".format(count))
+								print_time = False
 							return
 						x_motion.append(x)
 						y_motion.append(y)
