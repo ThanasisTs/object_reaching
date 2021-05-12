@@ -1,12 +1,13 @@
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Time.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <cartesian_state_msgs/PoseTwist.h>
 #include <math.h>
 #include <vector>
 
-ros::Publisher cmd_vel_pub;
+ros::Publisher cmd_vel_pub, time_pub;
 float desiredVel, xInit, yInit, zInit, dirX, dirY, theta;
 int D;
 std::vector<float> xGoal, yGoal;
@@ -39,6 +40,11 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 	if (reached_init){
 		if (prediction){
 			if (first_time){
+				// ROS_INFO_STREAM("Robot motion started at time " << ros::Time::now() << " secs");
+				// std_msgs::Time robot_time;
+				// robot_time.data = ros::Time::now();
+				// time_pub.publish(robot_time);
+				
 				first_time = false;
 				if (direction){
 					goal_pos.point.x = xGoal[0];
@@ -60,18 +66,29 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 				cmd_vel.linear.y = desiredVel*dirY + D*(yGoal[0] - current_pos.point.y);
 			}
 			else{
-				ROS_INFO_STREAM(desiredVel*dirX << " " << desiredVel*dirY);
-				// ROS_INFO_STREAM(xGoal[1] - current_pos.point.x);
 				cmd_vel.linear.x = desiredVel*dirX + D*(xGoal[1] - current_pos.point.x);
 				cmd_vel.linear.y = desiredVel*dirY + D*(yGoal[1] - current_pos.point.y);
 			}
+			cmd_vel.linear.x = 0;
 			cmd_vel.linear.z = 0;
-			// ROS_INFO_STREAM("cmd_vel: " << cmd_vel);
-
-			if (current_pos.point.y - goal_pos.point.y < 0 and not reached_goal){
+			if (current_pos.point.y - goal_pos.point.y > 0 and goal_pos.point.y == yGoal[1] and not reached_goal){
 				ROS_INFO_STREAM("Robot time: " << ros::Time::now().toNSec());
+				std_msgs::Time robot_time;
+				robot_time.data = ros::Time::now();
+				time_pub.publish(robot_time);
 				reached_goal = true;
 			}
+			if (current_pos.point.y - goal_pos.point.y < 0 and goal_pos.point.y == yGoal[0] and not reached_goal){
+				ROS_INFO_STREAM("Robot time: " << ros::Time::now().toNSec());
+				std_msgs::Time robot_time;
+				robot_time.data = ros::Time::now();
+				time_pub.publish(robot_time);
+				reached_goal = true;
+			}
+			// // Used for testing time. Remove the three following lines when testing the robot motion
+			// cmd_vel.linear.x = 0;
+			// cmd_vel.linear.y = 0;
+			// cmd_vel.linear.z = 0;
 			cmd_vel_pub.publish(cmd_vel);
 		}
 		else{
@@ -100,6 +117,8 @@ int main(int argc, char** argv){
 	init_pos.point.z = zInit;
 
 	cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/ur3_cartesian_velocity_controller/command_cart_vel", 10);
+	time_pub = nh.advertise<std_msgs::Time>("/robot_time_topic", 10);
+	
 	ros::Subscriber ee_state_sub = nh.subscribe("/ur3_cartesian_velocity_controller/ee_state", 10, state_callback);
 	ros::Subscriber prediction_sub = nh.subscribe("/prediction", 10, prediction_callback);
 	ros::spin();

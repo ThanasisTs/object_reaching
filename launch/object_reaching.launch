@@ -11,4 +11,10 @@
 		<rosparam command="load" file="$(find object_reaching)/config/object_reaching.yaml"/>
 	</node>
 	
+	<node pkg="object_reaching" type="result.py" name='result' respawn='false' output='screen'>
+	</node>
+	
+	<!--<node pkg="object_reaching" type="check_timestamps.py" name='check_timestamps' respawn='false' output='screen'>
+	</node> -->
+
 </launch>
