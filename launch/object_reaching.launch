@@ -1,6 +1,17 @@
 <?xml version="1.0"?>
 <launch>
 
+	<arg name="visual_input" default="false"/>
+	<arg name="live_camera" default="false"/>
+	<arg name="sim" default="false"/>
+
+	<group if="$(arg visual_input)">
+		<include file="$(find pipeline_launch)/launch/pipeline_launch.launch">
+			<arg name="live_camera" default="$(arg live_camera)"/>
+			<arg name="sim" default="$(arg sim)"/>
+		</include>
+	</group>
+
 	<node pkg="object_reaching" type="input_process.py" name='input_process' respawn='false' output='screen'>
 	</node>
 

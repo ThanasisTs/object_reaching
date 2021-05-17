@@ -24,3 +24,4 @@ if __name__ == "__main__":
 		pass
 
 	rospy.logerr("Human won by {} secs".format((robot_time-human_time)*1000)) if robot_time-human_time > 0 else rospy.logwarn("Robot won by {} secs".format((human_time-robot_time)*1000))
+	rospy.spin()
