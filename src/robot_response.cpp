@@ -41,7 +41,7 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 			init_time = ros::Time::now().toSec();
 		}
 		cmd_vel.linear.x = 0;
-		cmd_vel.linear.y = desiredVel + D*(yGoal - current_pos.point.y + 0.032);
+		cmd_vel.linear.y = 0;//desiredVel + D*(yGoal - current_pos.point.y + 0.032);
 		cmd_vel.linear.z = 0;
 		cmd_vel_pub.publish(cmd_vel);
 		if (current_pos.point.y - yGoal - 0.032 < 0 and not_reached_goal){

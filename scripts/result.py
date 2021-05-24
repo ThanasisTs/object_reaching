@@ -20,8 +20,8 @@ if __name__ == "__main__":
 	robot_sub = rospy.Subscriber('robot_time_topic', Time, robot_time_callback)
 	human_sub = rospy.Subscriber('human_time_topic', Time, human_time_callback)
 
-	while not (human_time_flag and robot_time_flag):
-		pass
-
-	rospy.logerr("Human won by {} secs".format((robot_time-human_time)*1000)) if robot_time-human_time > 0 else rospy.logwarn("Robot won by {} secs".format((human_time-robot_time)*1000))
-	rospy.spin()
+	while not rospy.is_shutdown():
+		if human_time_flag and robot_time_flag:
+			rospy.logerr("Human won by {} secs".format((robot_time-human_time)*1000)) if robot_time-human_time > 0 else rospy.logwarn("Robot won by {} secs".format((human_time-robot_time)*1000))
+			human_time_flag, robot_time_flag = False, False
+			

@@ -1,20 +1,4 @@
-#include <ros/ros.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/Time.h>
-#include <geometry_msgs/PointStamped.h>
-#include <geometry_msgs/Twist.h>
-#include <cartesian_state_msgs/PoseTwist.h>
-#include <math.h>
-#include <vector>
-
-ros::Publisher cmd_vel_pub, time_pub;
-float desiredVel, xInit, yInit, zInit, dirX, dirY, theta;
-int D;
-std::vector<float> xGoal, yGoal;
-geometry_msgs::PointStamped current_pos, init_pos, goal_pos;
-geometry_msgs::Twist cmd_vel;
-bool prediction = false, direction, reached_init = false, reached_goal = false, first_time = true;
-double start_time;
+#include "object_reaching/robot_motion.h"
 
 double euclidean_distance(const geometry_msgs::PointStamped& p1, const geometry_msgs::PointStamped& p2){
 	return sqrt(pow(p1.point.x-p2.point.x, 2) + pow(p1.point.y-p2.point.y, 2) + pow(p1.point.z-p2.point.z, 2));
@@ -40,11 +24,6 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 	if (reached_init){
 		if (prediction){
 			if (first_time){
-				// ROS_INFO_STREAM("Robot motion started at time " << ros::Time::now() << " secs");
-				// std_msgs::Time robot_time;
-				// robot_time.data = ros::Time::now();
-				// time_pub.publish(robot_time);
-				
 				first_time = false;
 				if (direction){
 					goal_pos.point.x = xGoal[0];
@@ -77,6 +56,9 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 				robot_time.data = ros::Time::now();
 				time_pub.publish(robot_time);
 				reached_goal = true;
+				std_msgs::Bool reset_game;
+				reset_game.data = true;
+				reset_game_pub.publish(reset_game);
 			}
 			if (current_pos.point.y - goal_pos.point.y < 0 and goal_pos.point.y == yGoal[0] and not reached_goal){
 				ROS_INFO_STREAM("Robot time: " << ros::Time::now().toNSec());
@@ -84,11 +66,13 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 				robot_time.data = ros::Time::now();
 				time_pub.publish(robot_time);
 				reached_goal = true;
+				std_msgs::Bool reset_game;
+				reset_game.data = true;
+				reset_game_pub.publish(reset_game);
 			}
-			// // Used for testing time. Remove the three following lines when testing the robot motion
-			// cmd_vel.linear.x = 0;
-			// cmd_vel.linear.y = 0;
-			// cmd_vel.linear.z = 0;
+			if (reached_goal and abs(cmd_vel.linear.y) < 0.001){
+				prediction = false;
+			}
 			cmd_vel_pub.publish(cmd_vel);
 		}
 		else{
@@ -96,6 +80,12 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 			cmd_vel.linear.y = 0;
 			cmd_vel.linear.z = 0;
 			cmd_vel_pub.publish(cmd_vel);
+			if (reached_goal){
+				ROS_WARN_STREAM("Reached goal. Gonna sleep for 5 seconds and return to the initial robot position");
+				ros::Duration(5).sleep();
+				ROS_WARN_STREAM("Returning to the initial position");
+				reached_init = false, reached_goal = false, first_time = true;
+			}
 		}
 	}
 }
@@ -118,6 +108,7 @@ int main(int argc, char** argv){
 
 	cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/ur3_cartesian_velocity_controller/command_cart_vel", 10);
 	time_pub = nh.advertise<std_msgs::Time>("/robot_time_topic", 10);
+	reset_game_pub = nh.advertise<std_msgs::Bool>("/reset_game_topic", 10);
 	
 	ros::Subscriber ee_state_sub = nh.subscribe("/ur3_cartesian_velocity_controller/ee_state", 10, state_callback);
 	ros::Subscriber prediction_sub = nh.subscribe("/prediction", 10, prediction_callback);
