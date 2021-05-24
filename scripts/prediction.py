@@ -4,7 +4,7 @@ from std_msgs.msg import Bool, Time
 from geometry_msgs.msg import Vector3Stamped
 
 import os
-import scandir
+import sys
 from scipy.spatial import distance
 import numpy as np
 import pickle
@@ -46,13 +46,11 @@ def callback(msg):
 		prediction_time_pub.publish(prediction_time)
 		
 
-obj_R = [341.46, 247.29]
-obj_L = [411.91, 287.91]
-
 # Callback for predicting based on distances
 def callback_dis(msg):
-	global pub, models, count, pixels
+	global pub, models, count, pixels, obj_R, obj_L
 
+	print(obj_R, obj_L)
 	count += 1
 	if count == 1:
 		pixels = np.append(pixels, np.array([msg.vector.x, msg.vector.y]))
@@ -74,10 +72,12 @@ def callback_dis(msg):
 if __name__ == "__main__":
 	rospy.init_node('prediction')
 
-	os.chdir('/home/ttsitos/object_reaching/learning/models/logistic_regression_dis/H1_O2')
-	model_names = [i for i in os.listdir('.')]
+	model_names = [i for i in os.listdir(sys.argv[1])]
 	model_names = sorted(model_names)
-
+	
+	obj_R = rospy.get_param("prediction/obj_R", [None, None])
+	obj_L = rospy.get_param("prediction/obj_L", [None, None])
+	
 	for i in range(1, 11):
 		models.update({i : model_names[i-1]})
 

@@ -4,6 +4,7 @@
 	<arg name="visual_input" default="false"/>
 	<arg name="live_camera" default="false"/>
 	<arg name="sim" default="false"/>
+	<arg name="models_path" default="false"/>
 
 	<group if="$(arg visual_input)">
 		<include file="$(find pipeline_launch)/launch/pipeline_launch.launch">
@@ -15,7 +16,8 @@
 	<node pkg="object_reaching" type="input_process.py" name='input_process' respawn='false' output='screen'>
 	</node>
 
-	<node pkg="object_reaching" type="prediction.py" name='prediction' respawn='false' output='screen'>
+	<node pkg="object_reaching" type="prediction.py" name='prediction' respawn='false' output='screen' args='$(arg models_path)'>
+		<rosparam command="load" file="$(find object_reaching)/config/prediction.yaml"/>
 	</node>
 
 	<node pkg="object_reaching" type="robot_motion" name='robot_motion' respawn='false' output='screen'>
