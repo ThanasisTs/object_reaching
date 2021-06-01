@@ -12,6 +12,8 @@ void prediction_callback(const std_msgs::Bool::ConstPtr msg){
 void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 	current_pos.point = msg->pose.position;
 	current_pos.header = msg->header;
+
+	// Reach the initial robot position
 	if (euclidean_distance(current_pos, init_pos) > 0.001 and not reached_init){
 		cmd_vel.linear.x = 1*(init_pos.point.x - current_pos.point.x);
 		cmd_vel.linear.y = 1*(init_pos.point.y - current_pos.point.y);
@@ -21,8 +23,12 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 	else{
 		reached_init = true;
 	}
+	
+	// Check if the initial robot position has been reached
 	if (reached_init){
+		// Check if the output of the prediction is available
 		if (prediction){
+			// Compute the direction of the robot motion according to the prediction
 			if (first_time){
 				first_time = false;
 				if (direction){
@@ -40,6 +46,7 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 					theta = atan((yGoal[1] - current_pos.point.y)/(xGoal[1] - current_pos.point.x));
 				}
 			}
+			// Compute the robot commanded velocities according to the robot direction 
 			if (direction){
 				cmd_vel.linear.x = desiredVel*dirX + D*(xGoal[0] - current_pos.point.x);
 				cmd_vel.linear.y = desiredVel*dirY + D*(yGoal[0] - current_pos.point.y);
@@ -50,6 +57,8 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 			}
 			cmd_vel.linear.x = 0;
 			cmd_vel.linear.z = 0;
+			
+			// Check if the robot has reached the goal position
 			if (current_pos.point.y - goal_pos.point.y > 0 and goal_pos.point.y == yGoal[1] and not reached_goal){
 				ROS_INFO_STREAM("Robot time: " << ros::Time::now().toNSec());
 				std_msgs::Time robot_time;
@@ -73,6 +82,7 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 			if (reached_goal and abs(cmd_vel.linear.y) < 0.001){
 				prediction = false;
 			}
+			// Publish the commanded velocities
 			cmd_vel_pub.publish(cmd_vel);
 		}
 		else{

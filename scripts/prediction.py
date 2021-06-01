@@ -50,7 +50,6 @@ def callback(msg):
 def callback_dis(msg):
 	global pub, models, count, pixels, obj_R, obj_L
 
-	print(obj_R, obj_L)
 	count += 1
 	if count == 1:
 		pixels = np.append(pixels, np.array([msg.vector.x, msg.vector.y]))
@@ -72,6 +71,7 @@ def callback_dis(msg):
 if __name__ == "__main__":
 	rospy.init_node('prediction')
 
+	# Load prediction models
 	model_names = [i for i in os.listdir(sys.argv[1])]
 	model_names = sorted(model_names)
 	
@@ -81,12 +81,19 @@ if __name__ == "__main__":
 	for i in range(1, 11):
 		models.update({i : model_names[i-1]})
 
+	# Subscribe to the filtered pixels
 	sub = rospy.Subscriber('/filtered_pixels', Vector3Stamped, callback_dis)
+	
+	# Subcribe for reseting the game 
 	reset_sub = rospy.Subscriber('/reset_game_topic', Bool, reset_game_callback)
 
+	# Publishes the output of the prediction
 	pub = rospy.Publisher('/prediction', Bool, queue_size=10)
+	
+	# Publishes the time of the prediction
 	prediction_time_pub = rospy.Publisher('/prediction_time_topic', Time, queue_size=10)
 	
+	# Check if we have received a signal for reseting the game
 	while not rospy.is_shutdown():
 		if prediction_flag:
 			pixels = np.array([])

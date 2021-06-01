@@ -33,7 +33,7 @@ def reset_game_callback(msg):
 
 # Removal of NaNs, outliers and redundant points at the start of the motion
 def openpose_callback(msg):
-	global pub, prediction_pixel_time, third_pixel_pub, time_pub, start_game, start, end, start_std, count, x_prev, y_prev, time_prev, start_time, print_time
+	global pub, prediction_pixel_time, prediction_pixel_pub, time_pub, start_game, start, end, start_std, count, x_prev, y_prev, time_prev, start_time, print_time
 
 	if start_game:
 		try:
@@ -97,7 +97,7 @@ def openpose_callback(msg):
 							if len(x_motion) == 4:
 								prediction_pixel_time = Time()
 								prediction_pixel_time.data = rospy.Time.now()
-								third_pixel_pub.publish(prediction_pixel_time)
+								prediction_pixel_pub.publish(prediction_pixel_time)
 							time_motion.append(time)
 							pixel = Vector3Stamped()
 							pixel.vector.x = x
@@ -107,10 +107,20 @@ def openpose_callback(msg):
 
 if __name__ == "__main__":
 	rospy.init_node("input_process")
+	
+	# Publishes filtered pixels
 	pub = rospy.Publisher('/filtered_pixels', Vector3Stamped, queue_size=10)
+	
+	# Publishes the time when the human reaches the object
 	time_pub = rospy.Publisher('/human_time_topic', Time, queue_size=10)
-	third_pixel_pub = rospy.Publisher('/third_pixel_topic', Time, queue_size=10)
+	
+	# Publishes the time of the pixel of the prediction 
+	prediction_pixel_pub = rospy.Publisher('/prediction_pixel_topic', Time, queue_size=10)
+	
+	# Subscribes to the Openpose raw pixels
 	sub = rospy.Subscriber('/openpose_ros/human_list', OpenPoseHumanList, openpose_callback)
+	
+	# Subscriber for reseting the game
 	reset_sub = rospy.Subscriber('/reset_game_topic', Bool, reset_game_callback)
 
 	s = rospy.Service('/next_motion', Empty, service)
