@@ -34,6 +34,7 @@ def callback(msg):
 		pixels = np.append(pixels, np.array([msg.vector.x, msg.vector.y]).reshape(1, -1), axis=0)
 
 	if pixels.size == 8: # {3 pixels : 6, 4 pixels : 8, 5 pixels: 10, 6 pixels : 12}
+		
 		clf = pickle.load(open(models[count], 'rb'))
 		pixels_reshaped = pixels.reshape(1, -1)
 		prediction = clf.predict(pixels_reshaped)
@@ -68,10 +69,35 @@ def callback_dis(msg):
 		prediction_time.data = rospy.Time.now()
 		prediction_time_pub.publish(prediction_time)
 
+# Callback for predicting based on distances
+def callback_dis_concat(msg):
+	global pub, models, count, pixels, obj_R, obj_L
+
+	count += 1
+	if count == 1:
+		pixels = np.append(pixels, np.array([distance.euclidean([msg.vector.x, msg.vector.y], obj_R), distance.euclidean([msg.vector.x, msg.vector.y], obj_L)]))
+		pixels = pixels.reshape(1, -1)
+	else:
+		pixels = np.append(pixels, np.array([distance.euclidean([msg.vector.x, msg.vector.y], obj_R), distance.euclidean([msg.vector.x, msg.vector.y], obj_L)]).reshape(1, -1), axis=0)
+
+	if pixels.size == 8: # {3 pixels : 6, 4 pixels : 8, 5 pixels: 10, 6 pixels : 12}
+		clf = pickle.load(open(models[count], 'rb'))		
+		pixels_reshaped = pixels.reshape(1, -1)
+		prediction = clf.predict(pixels_reshaped)
+		pred_msg = Bool()
+		pred_msg.data = True if prediction == 1 else False
+
+		rospy.loginfo('Predicted {} '.format(prediction))
+		pub.publish(pred_msg)
+		prediction_time = Time()
+		prediction_time.data = rospy.Time.now()
+		prediction_time_pub.publish(prediction_time)
+
 if __name__ == "__main__":
 	rospy.init_node('prediction')
 
 	# Load prediction models
+	os.chdir(sys.argv[1])
 	model_names = [i for i in os.listdir(sys.argv[1])]
 	model_names = sorted(model_names)
 	
@@ -82,7 +108,7 @@ if __name__ == "__main__":
 		models.update({i : model_names[i-1]})
 
 	# Subscribe to the filtered pixels
-	sub = rospy.Subscriber('/filtered_pixels', Vector3Stamped, callback_dis)
+	sub = rospy.Subscriber('/filtered_pixels', Vector3Stamped, callback_dis_concat)
 	
 	# Subcribe for reseting the game 
 	reset_sub = rospy.Subscriber('/reset_game_topic', Bool, reset_game_callback)

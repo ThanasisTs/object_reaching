@@ -1,11 +1,11 @@
 # Object positions
 # First entries for the right one, second for the left one (from our point of view)
 xGoal: [0.344, 0.344]
-yGoal: [-0.051, 0.049] 
+yGoal: [-0.1, 0.1]
 
 # Initial ee position
 xInit: 0.344
-yInit: -0.001
+yInit: 0.00
 zInit: 0.065
 
 # Desired velocity which which the robot reaches the object

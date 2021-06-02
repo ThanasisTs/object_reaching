@@ -65,9 +65,6 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 				robot_time.data = ros::Time::now();
 				time_pub.publish(robot_time);
 				reached_goal = true;
-				std_msgs::Bool reset_game;
-				reset_game.data = true;
-				reset_game_pub.publish(reset_game);
 			}
 			if (current_pos.point.y - goal_pos.point.y < 0 and goal_pos.point.y == yGoal[0] and not reached_goal){
 				ROS_INFO_STREAM("Robot time: " << ros::Time::now().toNSec());
@@ -75,9 +72,9 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 				robot_time.data = ros::Time::now();
 				time_pub.publish(robot_time);
 				reached_goal = true;
-				std_msgs::Bool reset_game;
-				reset_game.data = true;
-				reset_game_pub.publish(reset_game);
+				// std_msgs::Bool reset_game;
+				// reset_game.data = true;
+				// reset_game_pub.publish(reset_game);
 			}
 			if (reached_goal and abs(cmd_vel.linear.y) < 0.001){
 				prediction = false;
@@ -91,6 +88,9 @@ void state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr msg){
 			cmd_vel.linear.z = 0;
 			cmd_vel_pub.publish(cmd_vel);
 			if (reached_goal){
+				std_msgs::Bool reset_game;
+				reset_game.data = true;
+				reset_game_pub.publish(reset_game);
 				ROS_WARN_STREAM("Reached goal. Gonna sleep for 5 seconds and return to the initial robot position");
 				ros::Duration(5).sleep();
 				ROS_WARN_STREAM("Returning to the initial position");

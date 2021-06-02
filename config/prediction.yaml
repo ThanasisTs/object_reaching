@@ -1,3 +1,7 @@
-# Object positions
-obj_R: [341.46, 247.29]
-obj_L: [411.91, 287.91]
+# # Touching Objects
+# obj_R: [348.3, 241.65]
+# obj_L: [364.98, 258.32]
+
+# Distant Objects
+obj_R: [342.18, 246.49]
+obj_L: [380.39, 267.27]

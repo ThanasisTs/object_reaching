@@ -3,14 +3,28 @@
 
 	<arg name="visual_input" default="false"/>
 	<arg name="live_camera" default="false"/>
-	<arg name="sim" default="false"/>
 	<arg name="models_path" default="false"/>
 
 	<group if="$(arg visual_input)">
-		<include file="$(find pipeline_launch)/launch/pipeline_launch.launch">
-			<arg name="live_camera" default="$(arg live_camera)"/>
-			<arg name="sim" default="$(arg sim)"/>
+
+		<!-- launch xtion driver -->
+		<include file="$(find manos_vision)/launch/asus_xtion.launch" if="$(arg live_camera)">
 		</include>
+
+		<!-- launch openpose -->
+		<node pkg="openpose_ros" type="openpose_ros_node" name="openpose_ros_node" output="screen">
+			<param name="image_topic"                value="/camera/rgb/image_raw" />
+			<param name="input_image_transport_type" value="raw" />
+			<param name="output_topic"               value="/openpose_ros/human_list" />
+			<param name="display_output"             value="true" />
+			<param name="print_keypoints"            value="false" />
+			<param name="save_original_video"        value="false" />
+			<param name="save_openpose_video"        value="false" />
+			<param name="original_video_file_name"   value="original_video_output.avi" />
+			<param name="openpose_video_file_name"   value="openpose_video_output.avi" />
+			<param name="video_fps"                  value="30" />
+		</node>
+	
 	</group>
 
 	<node pkg="object_reaching" type="input_process.py" name='input_process' respawn='false' output='screen'>

@@ -84,8 +84,8 @@ def openpose_callback(msg):
 							if std_total <= 10 and end:
 								if print_time:
 									end_time = rospy.Time.now().to_sec()
-									rospy.loginfo("Human motion duration: {}".format((end_time - start_time)*1000))
-									rospy.loginfo("Human motion duration from the prediction onwards: {}".format((end_time - prediction_pixel_time.data.to_sec())*1000))
+									# rospy.loginfo("Human motion duration: {}".format((end_time - start_time)*1000))
+									# rospy.loginfo("Human motion duration from the prediction onwards: {}".format((end_time - prediction_pixel_time.data.to_sec())*1000))
 									print("Motion ended at sample {}".format(count))
 									human_time = Time()
 									human_time.data = rospy.Time.now()
